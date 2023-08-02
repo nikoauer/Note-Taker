@@ -1,8 +1,9 @@
-const router = require('express').Router();
+const notes = require('express').Router();
 const path = require('path');
 
-router.get('/', (req, res) =>
-  res.status(200).sendFile(path.join(__dirname, '../public/notes.html'))
-);
+notes.get('/', (req, res) => {
+    console.info(`${req.method} request received for notes`);
+  });
 
-module.exports = router
+
+module.exports = notes
