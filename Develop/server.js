@@ -35,6 +35,7 @@ app.post('/api/notes', (req, res) => {
     const dataToSave = JSON.stringify(notes)
     fs.writeFileSync('./db/db.json', dataToSave);
     res.json(notes);
+    console.info(`${req.method} request received for notes page`);
 });
 
 
@@ -49,6 +50,7 @@ app.delete("/api/notes/:noteID", (req, res) => {
     
     fs.writeFileSync('./db/db.json', dataToSave);
     
+    console.info(`${req.method} request received for notes page`);
     res.status(200).json({ success: true, message: "Note deleted successfully." });
   } catch (error) {
     res.status(500).json({ success: false, message: "An error occurred while deleting the note." });
