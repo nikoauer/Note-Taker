@@ -1,9 +1,8 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs')
-const notesArray = require('./db/db.json')
-
 const PORT = 3001;
+const {nanoid} = require("nanoid");
 
 const app = express();
 
@@ -11,16 +10,34 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+const readMyFile = () => {
+  const data = fs.readFileSync('./db/db.json', 'utf8');
+  console.log(data);
+  return JSON.parse(data)
+}
 
 app.get('/api/notes', (req, res) => {
-  res.json(notesArray);
+  const notes = readMyFile()
+  res.json(notes);
 });
 
 
 app.post('/api/notes', (req, res) => {
-  console.log(req.body);
-  notesArray.push(req.body);
-  res.send(201);
+  const notes = readMyFile()
+  var newNote = {...req.body, id: nanoid() }
+  notes.push(newNote);
+  const dataToSave = JSON.stringify(notes)
+  fs.writeFileSync('./db/db.json', dataToSave);
+  res.sendStatus(201);
+})
+
+
+app.delete("/api/notes/:noteID", (req,res)=> {
+  console.log(req.params)
+  //read file bc we have an arrray
+  // (Look how to filter from an array)
+
+  //make sure you write to save.
 })
 
 app.get('/notes', (req, res) => {
