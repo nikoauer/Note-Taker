@@ -12,7 +12,6 @@ app.use(express.static('public'));
 
 const readMyFile = () => {
   const data = fs.readFileSync('./db/db.json', 'utf8');
-  console.log(data);
   return JSON.parse(data)
 }
 
@@ -31,14 +30,25 @@ app.post('/api/notes', (req, res) => {
   res.sendStatus(201);
 })
 
+function removeNote (notes, noteID) {
+  return notes.filter((obj) => obj.id !== noteID);
+}
 
-app.delete("/api/notes/:noteID", (req,res)=> {
-  console.log(req.params)
-  //read file bc we have an arrray
-  // (Look how to filter from an array)
-
-  //make sure you write to save.
-})
+app.delete("/api/notes/:noteID", (req, res) => {
+  try {
+    const notes = readMyFile();
+    const noteID = req.params.noteID;
+    
+    const newArray = removeNote(notes, noteID);
+    const dataToSave = JSON.stringify(newArray);
+    
+    fs.writeFileSync('./db/db.json', dataToSave);
+    
+    res.status(200).json({ success: true, message: "Note deleted successfully." });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "An error occurred while deleting the note." });
+  }
+});
 
 app.get('/notes', (req, res) => {
   res.sendFile(path.join(__dirname, '/public/notes.html'))
