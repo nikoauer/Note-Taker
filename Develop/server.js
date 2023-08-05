@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs')
 const PORT = 3001;
-const {nanoid} = require("nanoid");
+const { nanoid } = require("nanoid");
 
 const app = express();
 
@@ -10,30 +10,35 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+// This function reads the db file and parses it
 const readMyFile = () => {
   const data = fs.readFileSync('./db/db.json', 'utf8');
   return JSON.parse(data)
 }
 
+// This function filters through the array to find all the notes that don't have the machine noteID 
+function removeNote (notes, noteID) {
+  return notes.filter((obj) => obj.id !== noteID);
+};
+
+// This request reads the db file and displays it
 app.get('/api/notes', (req, res) => {
-  const notes = readMyFile()
-  res.json(notes);
+    const notes = readMyFile()
+    res.json(notes);
+});
+
+// This request reads the db adds the new note with a unique id and the writes it to the db file
+app.post('/api/notes', (req, res) => {
+    const notes = readMyFile()
+    var newNote = {...req.body, id: nanoid() }
+    notes.push(newNote);
+    const dataToSave = JSON.stringify(notes)
+    fs.writeFileSync('./db/db.json', dataToSave);
+    res.json(notes);
 });
 
 
-app.post('/api/notes', (req, res) => {
-  const notes = readMyFile()
-  var newNote = {...req.body, id: nanoid() }
-  notes.push(newNote);
-  const dataToSave = JSON.stringify(notes)
-  fs.writeFileSync('./db/db.json', dataToSave);
-  res.sendStatus(201);
-})
-
-function removeNote (notes, noteID) {
-  return notes.filter((obj) => obj.id !== noteID);
-}
-
+// This request deletes any note that has an id that matches the respective note id
 app.delete("/api/notes/:noteID", (req, res) => {
   try {
     const notes = readMyFile();
